@@ -516,6 +516,13 @@ enum ofpraw {
 
     /* NXST 1.0+ (4): struct nx_ipfix_stats_reply[]. */
     OFPRAW_NXST_IPFIX_FLOW_REPLY,
+
+    /* ONFST 1.3+ (65535): void. */
+    OFPRAW_ONFST13_EXPERIMENTER_STATS_REQUEST,
+
+    /* ONFST 1.3+ (65535): struct ofp_experimenter_stats. */
+    OFPRAW_ONFST13_EXPERIMENTER_STATS_REPLY,
+
 };
 
 /* Decoding messages into OFPRAW_* values. */
@@ -765,6 +772,8 @@ enum ofptype {
     OFPTYPE_FLOW_MONITOR_CANCEL,        /* OFPRAW_NXT_FLOW_MONITOR_CANCEL. */
     OFPTYPE_FLOW_MONITOR_PAUSED,        /* OFPRAW_NXT_FLOW_MONITOR_PAUSED. */
     OFPTYPE_FLOW_MONITOR_RESUMED,       /* OFPRAW_NXT_FLOW_MONITOR_RESUMED. */
+    OFPTYPE_EXPERIMENTER_STATS_REQUEST,  /* OFPRAW_ONFST13_EXPERIMENTER_STATS_REQUEST. */
+    OFPTYPE_EXPERIMENTER_STATS_REPLY,    /* OFPRAW_ONFST13_EXPERIMENTER_STATS_REPLY. */
 };
 
 /* Decoding messages into OFPTYPE_* values. */

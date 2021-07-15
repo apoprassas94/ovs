@@ -246,6 +246,16 @@ struct ofp_prop_experimenter {
 };
 OFP_ASSERT(sizeof(struct ofp_prop_experimenter) == 12);
 
+
+/* The structure which coresponds to the experimenter reply message. */
+struct ofp_experimenter_stats {
+
+    char signal[4];
+    char tx_bitrate[4];
+};
+OFP_ASSERT(sizeof(struct ofp_experimenter_stats) == 8);
+
+
 /* Switch features. */
 struct ofp_switch_features {
     ovs_be64 datapath_id;   /* Datapath unique ID.  The lower 48-bits are for

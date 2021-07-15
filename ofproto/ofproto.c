@@ -3858,6 +3858,64 @@ handle_desc_stats_request(struct ofconn *ofconn,
     return 0;
 }
 
+
+/* Here is the hanler function for the custom experimenter request message.
+   Actually, you can handle depending on the needs of your scope. (e.g. 
+   store into the variables, that are corresponding to the experimenter reply message,
+   the statistics meters that are read from a statistic file)  */
+
+static enum ofperr
+handle_experimenter_stats_request(struct ofconn *ofconn,
+                          const struct ofp_header *request)
+{
+
+    // static const char *default_data = "TEST";
+    // static const char *file_name = "/root/.../stats_file.txt";
+    static const char *file_name = "/root/out_of_band/stats_file.txt";
+    FILE *fp;
+    char * line = NULL;
+    size_t len = 0;
+    ssize_t read;
+
+    // struct ofproto *p = ofconn_get_ofproto(ofconn);
+    struct ofp_experimenter_stats *ods;
+    struct ofpbuf *msg;
+
+
+    msg = ofpraw_alloc_stats_reply(request, 0);
+    ods = ofpbuf_put_zeros(msg, sizeof *ods);
+
+    fp = fopen(file_name, "r"); // read mode
+    if (fp == NULL)
+   {
+      VLOG_WARN("Error while opening the file.\n");
+      exit(EXIT_FAILURE);
+   }
+
+    while ((read = getline(&line, &len, fp)) != -1) {
+
+        if (strstr(line, "signal:")){
+          VLOG_INFO("~ signal ~\n");
+          ovs_strlcpy(ods->signal,(line+11), sizeof ods->signal);
+        }
+        if (strstr(line, " bitrate:")){
+          VLOG_INFO("~ tx birate ~\n");
+          ovs_strlcpy(ods->tx_bitrate, (line+13), sizeof ods->tx_bitrate);
+
+        }
+    }
+
+    fclose(fp);
+    if (line){
+        free(line);
+    }
+
+   ofconn_send_reply(ofconn, msg);
+
+    return 0;
+}
+
+
 static enum ofperr
 handle_table_stats_request(struct ofconn *ofconn,
                            const struct ofp_header *request)
@@ -8621,6 +8679,8 @@ handle_single_part_openflow(struct ofconn *ofconn, const struct ofp_header *oh,
 
     case OFPTYPE_CT_FLUSH_ZONE:
         return handle_nxt_ct_flush_zone(ofconn, oh);
+    case OFPTYPE_EXPERIMENTER_STATS_REQUEST:
+        return handle_experimenter_stats_request(ofconn, oh);
 
     case OFPTYPE_HELLO:
     case OFPTYPE_ERROR:
@@ -8657,6 +8717,7 @@ handle_single_part_openflow(struct ofconn *ofconn, const struct ofp_header *oh,
     case OFPTYPE_NXT_TLV_TABLE_REPLY:
     case OFPTYPE_IPFIX_BRIDGE_STATS_REPLY:
     case OFPTYPE_IPFIX_FLOW_STATS_REPLY:
+    case OFPTYPE_EXPERIMENTER_STATS_REPLY:
     default:
         if (ofpmsg_is_stat_request(oh)) {
             return OFPERR_OFPBRC_BAD_STAT;
